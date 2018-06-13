@@ -1,9 +1,30 @@
+spring:
+  application:
+    name: service-zuul-ui
+
 zuul:
   routes:
     foos:
       path: /foos/**
-      url: http://localhost:8081/spring-zuul-eureka-foos-resource/foos
+      serviceId: foo-service
+
+#url: http://10.242.136.100:8081/foos
+#serviceId: foo-service
+
+foo-service:
+  ribbon:
+    listOfServers: http://10.242.136.100:8081,http://10.242.136.100:8082,http://10.242.136.100:8083
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${DISCOVERY_URL:http://localhost:8761}/eureka/
 
 routing:
   tag:
     domain: qa-blue.igame.163.com
+
+logging:
+  level:
+    ROOT: INFO
+    org.springframework.web: DEBUG

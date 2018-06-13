@@ -1,6 +1,10 @@
+info:
+  component: Foo Serivce
+  tag: reg.igame.163.com
+
 server:
   port: ${PORT:8081}
-  context-path: /spring-zuul-eureka-foos-resource
+ # context-path: /spring-zuul-eureka-foos-resource
 
 spring:
   application:
