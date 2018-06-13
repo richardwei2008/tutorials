@@ -15,6 +15,7 @@
     </parent>
 
     <modules>
+        <module>spring-zuul-eureka-discovery-service</module>
         <module>spring-zuul-eureka-foos-resource</module>
         <module>spring-zuul-eureka-bars-resource</module>
         <module>spring-zuul-eureka-ui</module>

@@ -7,14 +7,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.baeldung.web.dto.Foo;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
+@RestController
 public class FooController {
+
+    @Value("${routing.tag.domain}")
+    private String tag;
 
     public FooController() {
         super();
@@ -28,8 +29,10 @@ public class FooController {
         // System.out.println("------" + req.getHeader("Test"));
         if (req.getHeader("TestFoo") != null) {
             res.addHeader("TestFoo", req.getHeader("TestFoo"));
+            res.addHeader("TestBar", req.getHeader("TestBar"));
+            res.addHeader("Routing", req.getHeader("Routing"));
         }
-        return new Foo(Long.parseLong(randomNumeric(2)), randomAlphabetic(4));
+        return new Foo(Long.parseLong(randomNumeric(2)), tag + "-" +randomAlphabetic(4));
     }
 
 }

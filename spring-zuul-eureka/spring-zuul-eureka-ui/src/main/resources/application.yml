@@ -3,3 +3,7 @@ zuul:
     foos:
       path: /foos/**
       url: http://localhost:8081/spring-zuul-eureka-foos-resource/foos
+
+routing:
+  tag:
+    domain: qa-blue.igame.163.com
