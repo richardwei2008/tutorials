@@ -1,29 +1,30 @@
 package org.baeldung.config;
 
-import com.netflix.client.config.IClientConfig;
-import com.netflix.loadbalancer.DynamicServerListLoadBalancer;
-import com.netflix.loadbalancer.Server;
+import com.netflix.zuul.ZuulFilter;
+import com.netflix.zuul.context.RequestContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.stereotype.Component;
 
-import com.netflix.zuul.ZuulFilter;
-import com.netflix.zuul.context.RequestContext;
-
-import javax.annotation.Resource;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.http.HttpServletRequest;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
 
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
+import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.ROUTE_TYPE;
 
 @Component
 public class CustomZuulFilter extends ZuulFilter {
+
+    @Autowired
+    private LoadBalancerClient loadBalancer;
+
     @Autowired
     private DiscoveryClient discoveryClient;
 
@@ -32,13 +33,9 @@ public class CustomZuulFilter extends ZuulFilter {
 
     @Override
     public Object run() {
-        System.out.println(String.format("Pre Filter"));
-        final RequestContext ctx = RequestContext.getCurrentContext();
-        ctx.addZuulRequestHeader("TestFoo", "FooSample");
-        ctx.addZuulRequestHeader("TestBar", "BarSample");
-        ctx.addZuulRequestHeader("Routing", tag);
-        HttpServletRequest request = ctx.getRequest();
-        System.out.println(String.format("%s request to %s", request.getMethod(), request.getRequestURL().toString()));
+        System.out.println(String.format("Custom Filter"));
+
+
         List<String> services = discoveryClient.getServices();
         for (String service :services) {
             System.out.println(service);
@@ -50,6 +47,15 @@ public class CustomZuulFilter extends ZuulFilter {
             }
         }
 
+//        PeerAwareInstanceRegistry registry = EurekaServerContextHolder.getInstance().getServerContext().getRegistry();
+//        Applications applications = registry.getApplications();
+//
+//        applications.getRegisteredApplications().forEach((registeredApplication) -> {
+//            registeredApplication.getInstances().forEach((instance) -> {
+//                System.out.println(instance.getAppName() + " (" + instance.getInstanceId() + ") : ");
+//            });
+//        });
+
 //
 //        List<Server> serverList = dynamicServerListLoadBalancer.getServerList(true);
 //        for (Server server : serverList) {
@@ -57,8 +63,22 @@ public class CustomZuulFilter extends ZuulFilter {
 //        }
 //        ctx.set("serviceId", “service-a”);
         try {
-            ctx.setRouteHost(new URL("http://localhost:8082/foos"));
-        } catch (MalformedURLException e) {
+            final RequestContext ctx = RequestContext.getCurrentContext();
+            String serviceId = (String) ctx.get("serviceId");
+            System.out.println("=============== serviceId\n" + serviceId);
+//            System.out.println("===============" + ctx.getRouteHost().toString());
+            ServiceInstance instance = loadBalancer.choose(serviceId);
+
+            String requestURI = ctx.getRequest().getRequestURI();
+            String proxy = (String) ctx.get("proxy");
+            String path = (String) ctx.get("path");
+            String uri = String.format("http://%s:%s/%s",
+                    instance.getHost(), instance.getPort(), proxy);
+            System.out.println("=============== routeHost \n" + uri);
+//            ctx.setRouteHost(new URL("http://localhost:8082/foos"));
+            ctx.setRouteHost(new URL(uri));
+//            ctx.setRouteHost(new URL("http://localhost:8082/foos"));
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
@@ -71,12 +91,12 @@ public class CustomZuulFilter extends ZuulFilter {
 
     @Override
     public int filterOrder() {
-        return 1110;
+        return 2;
     }
 
     @Override
     public String filterType() {
-        return PRE_TYPE;
+        return ROUTE_TYPE;
     }
 
 }

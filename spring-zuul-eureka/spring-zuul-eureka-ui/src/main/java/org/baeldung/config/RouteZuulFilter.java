@@ -2,27 +2,15 @@ package org.baeldung.config;
 
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
-import okhttp3.*;
-import okhttp3.internal.http.HttpMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.netflix.zuul.filters.ProxyRequestHelper;
-import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.StreamUtils;
-
 
 import javax.servlet.http.HttpServletRequest;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.ROUTE_TYPE;
 
-@Component
+//@Component
 public class RouteZuulFilter extends ZuulFilter {
 
     @Autowired
@@ -33,8 +21,8 @@ public class RouteZuulFilter extends ZuulFilter {
 
     @Override
     public Object run() {
-        System.out.println(String.format("Route Filter"));
-                RequestContext context = RequestContext.getCurrentContext();
+        System.out.println(String.format(filterType() + "- Filter"));
+        RequestContext context = RequestContext.getCurrentContext();
         HttpServletRequest request = context.getRequest();
 
         System.out.println(String.format("%s request to %s", request.getMethod(), request.getRequestURL().toString()));

@@ -23,6 +23,10 @@ eureka:
   instance:
     leaseRenewalIntervalInSeconds: 1
     leaseExpirationDurationInSeconds: 2
+    metadataMap:
+          instanceId: ${spring.application.name}:${random.value}
+
+## metadataMap
 
 ribbon:
   eureka:
